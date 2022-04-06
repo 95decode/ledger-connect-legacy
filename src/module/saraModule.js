@@ -3,7 +3,7 @@ import getSara from './getSara.js';
 import { ethers } from 'ethers';
 
 function SaraModule({eth,address}) {
-  const [saraContract, setSimpleStorage] = useState(undefined);
+  const [saraContract, setSaraModule] = useState(undefined);
   const [data, setData] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
   const [url, setUrl] = useState(undefined);
@@ -14,7 +14,7 @@ function SaraModule({eth,address}) {
     console.log(saraContract);
     const data = await saraContract.decimals();
     setProvider(provider);
-    setSimpleStorage(saraContract);
+    setSaraModule(saraContract);
     setData(data);
   };
 
