@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import ConnectLedger from './ConnectLedger.js';
-import SmartContract from './SmartContract.js';
+import ConnectLedger from './module/connectLedger.js';
+import SaraModule from './module/saraModule.js';
 
 function App() {
   const [transport, setTransport] = useState(undefined);
@@ -17,7 +17,7 @@ function App() {
     <div className='container'>
       { !transport ?
         <ConnectLedger onTransport={(info) => saveInfo(info)}></ConnectLedger> :
-        <SmartContract address={address} eth={eth}></SmartContract>
+        <SaraModule address={address} eth={eth}></SaraModule>
       }
     </div>
   );

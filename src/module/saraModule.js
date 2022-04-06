@@ -1,31 +1,31 @@
 import React, { useState } from 'react';
-import getBlockchain from './ethereum.js';
+import getSaraBEP20 from './getSara.js';
 import { ethers } from 'ethers';
 
-function SmartContract({eth,address}) {
-  const [simpleStorage, setSimpleStorage] = useState(undefined);
+function SaraModule({eth,address}) {
+  const [saraContract, setSimpleStorage] = useState(undefined);
   const [data, setData] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
   const [url, setUrl] = useState(undefined);
 
-  const smartContractRead = async() => {
+  const saraModuleRead = async() => {
     const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
-    const { simpleStorage } = await getBlockchain(provider);
-    console.log(simpleStorage);
-    const data = await simpleStorage.decimals();
+    const { saraContract } = await getSaraBEP20(provider);
+    console.log(saraContract);
+    const data = await saraContract.decimals();
     setProvider(provider);
-    setSimpleStorage(simpleStorage);
+    setSimpleStorage(saraContract);
     setData(data);
   };
 
   const updateData = async e => {
     e.preventDefault();
     //const dataInput = e.target.elements[0].value;
-    console.log(simpleStorage);
-    //const { data } = await simpleStorage.populateTransaction['updateData(uint256)'](dataInput);
+    console.log(saraContract);
+    //const { data } = await saraContract.populateTransaction['updateData(uint256)'](dataInput);
 
     const unsignedTx = {
-      //to: simpleStorage.address,
+      //to: saraContract.address,
       to: "0xee325C9c0d7e8b6A747eC016318A6b1e2d0248aD",
       value: ethers.utils.hexlify(100000),
       gasPrice: (await provider.getGasPrice())._hex,
@@ -57,7 +57,7 @@ function SmartContract({eth,address}) {
 
     const hash = (await provider.sendTransaction(signedTx)).hash;
     console.log(hash);
-    setUrl("https://testnet.bscscan.com/tx" + hash);
+    setUrl("https://testnet.bscscan.com/tx/" + hash);
   };
 
 
@@ -67,7 +67,7 @@ function SmartContract({eth,address}) {
         <div className='col-sm-4'>
           <p>Data:</p>
           <p>{data ? data.toString() : "..." }</p>
-          <button onClick={() => smartContractRead()}>Get Data</button>
+          <button onClick={() => saraModuleRead()}>Get Data</button>
         </div>
         <div className='col-sm-4'>
           <p>Change data</p>
@@ -96,4 +96,4 @@ function SmartContract({eth,address}) {
   );
 }
 
-export default SmartContract;
+export default SaraModule;
