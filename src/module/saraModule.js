@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import getSaraBEP20 from './getSara.js';
+import getSara from './getSara.js';
 import { ethers } from 'ethers';
 
 function SaraModule({eth,address}) {
@@ -10,7 +10,7 @@ function SaraModule({eth,address}) {
 
   const saraModuleRead = async() => {
     const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
-    const { saraContract } = await getSaraBEP20(provider);
+    const { saraContract } = await getSara(provider);
     console.log(saraContract);
     const data = await saraContract.decimals();
     setProvider(provider);

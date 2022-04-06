@@ -1,8 +1,6 @@
 import React from 'react';
-
 import TransportWebBLE from "@ledgerhq/hw-transport-web-ble";
 import Eth from "@ledgerhq/hw-app-eth";
-
 
 function ConnectLedger({onTransport}) {
 
@@ -12,7 +10,6 @@ function ConnectLedger({onTransport}) {
     const {address} = await eth.getAddress("44'/60'/0'/0/0", false);
     onTransport({address,eth,transport})
   }
-
 
   return (
     <div className='container'>
