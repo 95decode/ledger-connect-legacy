@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import getmultiSigWallet from './getmultiSigWallet.js';
+import getMultiSigWallet from './getMultiSigWallet.js';
 import { ethers } from 'ethers';
 
 ///////////////////// 양식임
@@ -11,7 +11,7 @@ function MultiSigModule({eth,address}) {
 
   const getDecimals = async () => {
     const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
-    const { multiSigContract } = await getmultiSigWallet(provider);
+    const { multiSigContract } = await getMultiSigWallet(provider);
     const decimals = await multiSigContract.decimals();
     setProvider(provider);
     setMultiSigModule(multiSigContract);

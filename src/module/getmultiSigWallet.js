@@ -3,7 +3,7 @@ import { Contract } from 'ethers';
 const abi = require('../abi/multiSigWallet.json');
 const contract = require('../contract/contract.json');
 
-const getmultiSigWallet = (provider) =>
+const getMultiSigWallet = (provider) =>
   new Promise( async (resolve, reject) => {
     if(provider) {
       const multiSigContract = new Contract(
@@ -17,4 +17,4 @@ const getmultiSigWallet = (provider) =>
     reject('Provider not recognized');
   });
 
-export default getmultiSigWallet;
+export default getMultiSigWallet;
