@@ -42,7 +42,7 @@ function MultiSigModule({eth,address}) {
     const { multiSigContract } = await getMultiSigWallet(provider);
     const transaction = await multiSigContract.getTransaction(_txIndex);
 
-    setTransaction(transaction);
+    setTransaction(JSON.stringify(transaction));
   };
 
   // Transaction
@@ -58,7 +58,7 @@ function MultiSigModule({eth,address}) {
       to: contract.multiSigWallet.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(2100000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -91,7 +91,7 @@ function MultiSigModule({eth,address}) {
       to: contract.multiSigWallet.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -124,7 +124,7 @@ function MultiSigModule({eth,address}) {
       to: contract.multiSigWallet.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -157,7 +157,7 @@ function MultiSigModule({eth,address}) {
       to: contract.multiSigWallet.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(2100000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -202,7 +202,8 @@ function MultiSigModule({eth,address}) {
           <p>Transaction : {transaction ? transaction.toString() : "unknown" }</p>
           <form className="form-inline" onSubmit={e => getTransaction(e)}>
             <input type="text" className="form-control" placeholder="TxIndex(uint256)"/>
-            <button type="submit" className="btn btn-primary">Query</button><hr/>
+            <button type="submit" className="btn btn-primary">Query</button>
+            <p>JSON Parser : <a href="http://json.parser.online.fr/" target="_blank" rel="noreferrer">json.parser.online.kr</a></p><hr/>
           </form>
         </div>
 

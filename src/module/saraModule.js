@@ -24,6 +24,7 @@ function SaraModule({eth,address}) {
   const [getDecreaseAllowanceUrl, setDecreaseAllowanceUrl] = useState(undefined);
   const [getAuthUrl, setGetAuthUrl] = useState(undefined);
   const [getMintUrl, setMintUrl] = useState(undefined);
+  const [getTransferOwnershipUrl, setTransferOwnershipUrl] = useState(undefined);
 
   // Data Payload
   const [getTransferData, setTransferData] = useState(undefined);
@@ -101,7 +102,7 @@ function SaraModule({eth,address}) {
       to: contract.sara.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -146,7 +147,7 @@ function SaraModule({eth,address}) {
       to: contract.sara.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -191,7 +192,7 @@ function SaraModule({eth,address}) {
       to: contract.sara.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -235,7 +236,7 @@ function SaraModule({eth,address}) {
       to: contract.sara.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -279,7 +280,7 @@ function SaraModule({eth,address}) {
       to: contract.sara.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -322,7 +323,7 @@ function SaraModule({eth,address}) {
       to: contract.sara.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -364,7 +365,7 @@ function SaraModule({eth,address}) {
       to: contract.sara.address,
       value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
+      gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
       data: data,
@@ -394,6 +395,48 @@ function SaraModule({eth,address}) {
     const { data } = await saraContract.populateTransaction['mint(uint256)'](_amount);
 
     setMintData(data);
+  };
+
+  const transferOwnership = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _newOwner = e.target.elements[0].value;
+    const { data } = await saraContract.populateTransaction['transferOwnership(address)'](_newOwner);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(210000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setTransferOwnershipUrl(scanUrl + hash);
+  };
+
+  const transferOwnershipEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _newOwner = document.querySelector('#NewOwner').value;
+    const { data } = await saraContract.populateTransaction['transferOwnership(address)'](_newOwner);
+
+    setTransferOwnershipData(data);
   };
 
   return (
@@ -527,6 +570,17 @@ function SaraModule({eth,address}) {
           <form className="form-inline" onSubmit={e => mint(e)}>
             <input type="text" className="form-control" placeholder="Amount(uint256)" id="Amount"/>
             <button type="button" className="btn btn-primary" onClick={mintEncode}>GetData</button>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>TransferOwnership</p>
+          <p>Tx Hash : <a href={getTransferOwnershipUrl} target="_blank" rel="noreferrer">{getTransferOwnershipUrl}</a></p>
+          <p>Data Payload : {getMintData}</p>
+          <form className="form-inline" onSubmit={e => transferOwnership(e)}>
+            <input type="text" className="form-control" placeholder="NewOwner(address)" id="NewOwner"/>
+            <button type="button" className="btn btn-primary" onClick={transferOwnershipEncode}>GetData</button>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
           </form>
         </div>
