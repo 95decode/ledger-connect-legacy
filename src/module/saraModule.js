@@ -7,9 +7,6 @@ function SaraModule({eth,address}) {
   const network = 'https://data-seed-prebsc-1-s1.binance.org:8545';
   const scanUrl = 'https://testnet.bscscan.com/tx/';
 
-  const [saraContract, setSaraModule] = useState(undefined);
-  const [provider, setProvider] = useState(undefined);
-
   // Query state
   const [owner, setOwner] = useState(undefined);
   const [decimals, setDecimals] = useState(undefined);
@@ -20,21 +17,28 @@ function SaraModule({eth,address}) {
   const [allowance, setAllowance] = useState(undefined);
 
   // Tx Url
-  const [getAuthUrl, setGetAuthUrl] = useState(undefined);
-  const [getTransferFromUrl, setTransferFromUrl] = useState(undefined);
-  const [getMintUrl, setMintUrl] = useState(undefined);
-  const [getApproveUrl, setApproveUrl] = useState(undefined);
   const [getTransferUrl, setTransferUrl] = useState(undefined);
+  const [getTransferFromUrl, setTransferFromUrl] = useState(undefined);
+  const [getApproveUrl, setApproveUrl] = useState(undefined);
   const [getIncreaseAllowanceUrl, setIncreaseAllowanceUrl] = useState(undefined);
   const [getDecreaseAllowanceUrl, setDecreaseAllowanceUrl] = useState(undefined);
+  const [getAuthUrl, setGetAuthUrl] = useState(undefined);
+  const [getMintUrl, setMintUrl] = useState(undefined);
+
+  // Data Payload
+  const [getTransferData, setTransferData] = useState(undefined);
+  const [getTransferFromData, setTransferFromData] = useState(undefined);
+  const [getApproveData, setApproveData] = useState(undefined);
+  const [getIncreaseAllowanceData, setIncreaseAllowanceData] = useState(undefined);
+  const [getDecreaseAllowanceData, setDecreaseAllowanceData] = useState(undefined);
+  const [getAuthData, setGetAuthData] = useState(undefined);
+  const [getMintData, setMintData] = useState(undefined);
 
   // Query
   const getOwner = async () => {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { saraContract } = await getSara(provider);
     const owner = await saraContract.getOwner();
-    setProvider(provider);
-    setSaraModule(saraContract);
     setOwner(owner);
   };
   
@@ -42,8 +46,6 @@ function SaraModule({eth,address}) {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { saraContract } = await getSara(provider);
     const decimals = await saraContract.decimals();
-    setProvider(provider);
-    setSaraModule(saraContract);
     setDecimals(decimals);
   };
 
@@ -51,8 +53,6 @@ function SaraModule({eth,address}) {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { saraContract } = await getSara(provider);
     const symbol = await saraContract.symbol();
-    setProvider(provider);
-    setSaraModule(saraContract);
     setSymbol(symbol);
   };
 
@@ -60,8 +60,6 @@ function SaraModule({eth,address}) {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { saraContract } = await getSara(provider);
     const name = await saraContract.name();
-    setProvider(provider);
-    setSaraModule(saraContract);
     setName(name);
   };
 
@@ -69,8 +67,6 @@ function SaraModule({eth,address}) {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { saraContract } = await getSara(provider);
     const totalSupply = await saraContract.totalSupply();
-    setProvider(provider);
-    setSaraModule(saraContract);
     setTotalSupply(totalSupply);
   };
 
@@ -80,8 +76,6 @@ function SaraModule({eth,address}) {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { saraContract } = await getSara(provider);
     const balanceOf = await saraContract.balanceOf(_account);
-    setProvider(provider);
-    setSaraModule(saraContract);
     setBalanceOf(balanceOf);
   };
 
@@ -92,14 +86,14 @@ function SaraModule({eth,address}) {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { saraContract } = await getSara(provider);
     const allowance = await saraContract.allowance(_owner, _spender);
-    setProvider(provider);
-    setSaraModule(saraContract);
     setAllowance(allowance);
   };
 
   // Transaction
   const transfer = async (e) => {
     e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
     const _recipient = e.target.elements[0].value;
     const _amount = e.target.elements[1].value;
     const { data } = await saraContract.populateTransaction['transfer(address,uint256)'](_recipient, _amount);
@@ -130,8 +124,66 @@ function SaraModule({eth,address}) {
     setTransferUrl(scanUrl + hash);
   };
 
+  const transferEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _recipient = document.querySelector('#Recipient').value
+    const _amount = document.querySelector('#Amount').value
+    const { data } = await saraContract.populateTransaction['transfer(address,uint256)'](_recipient, _amount);
+
+    setTransferData(data);
+  };
+
+  const transferFrom = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _sender = e.target.elements[0].value;
+    const _recipient = e.target.elements[1].value;
+    const _amount = e.target.elements[2].value;
+    const { data } = await saraContract.populateTransaction['transferFrom(address,address,uint256)'](_sender, _recipient, _amount);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setTransferFromUrl(scanUrl + hash);
+  };
+
+  const transferFromEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _sender = document.querySelector('#Sender').value
+    const _recipient = document.querySelector('#Recipient').value
+    const _amount = document.querySelector('#Amount').value
+    const { data } = await saraContract.populateTransaction['transferFrom(address,address,uint256)'](_sender, _recipient, _amount);
+
+    setTransferFromData(data);
+  };
+
   const approve = async (e) => {
     e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
     const _spender = e.target.elements[0].value;
     const _amount = e.target.elements[1].value;
     const { data } = await saraContract.populateTransaction['approve(address,uint256)'](_spender, _amount);
@@ -162,8 +214,20 @@ function SaraModule({eth,address}) {
     setApproveUrl(scanUrl + hash);
   };
 
+  const approveEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _spender = document.querySelector('#Spender').value;
+    const _amount = document.querySelector('#Amount').value;
+    const { data } = await saraContract.populateTransaction['approve(address,uint256)'](_spender, _amount);
+
+    setApproveData(data);
+  };
+
   const increaseAllowance = async (e) => {
     e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
     const _spender = e.target.elements[0].value;
     const _addedValue = e.target.elements[1].value;
     const { data } = await saraContract.populateTransaction['increaseAllowance(address,uint256)'](_spender, _addedValue);
@@ -194,8 +258,20 @@ function SaraModule({eth,address}) {
     setIncreaseAllowanceUrl(scanUrl + hash);
   };
 
+  const increaseAllowanceEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _spender = document.querySelector('#Spender').value;
+    const _addedValue = document.querySelector('#AddedValue').value;
+    const { data } = await saraContract.populateTransaction['increaseAllowance(address,uint256)'](_spender, _addedValue);
+
+    setIncreaseAllowanceData(data);
+  };
+
   const decreaseAllowance = async (e) => {
     e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
     const _spender = e.target.elements[0].value;
     const _subtractedValue = e.target.elements[1].value;
     const { data } = await saraContract.populateTransaction['decreaseAllowance(address,uint256)'](_spender, _subtractedValue);
@@ -226,39 +302,20 @@ function SaraModule({eth,address}) {
     setDecreaseAllowanceUrl(scanUrl + hash);
   };
 
-  const mint = async (e) => {
-    e.preventDefault();
-    const _amount = e.target.elements[0].value;
-    const { data } = await saraContract.populateTransaction['mint(uint256)'](_amount);
-    const unsignedTx = {
-      to: contract.sara.address,
-      value: 0,
-      gasPrice: (await provider.getGasPrice())._hex,
-      gasLimit: ethers.utils.hexlify(100000),
-      nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
-      data: data,
-    }
+  const decreaseAllowanceEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _spender = document.querySelector('#Spender').value;
+    const _subtractedValue = document.querySelector('#SubtractedValue').value;
+    const { data } = await saraContract.populateTransaction['decreaseAllowance(address,uint256)'](_spender, _subtractedValue);
 
-    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
-    const signature = await eth.signTransaction(
-      "44'/60'/0'/0/0",
-      serializedTx
-    );
-
-    signature.r = "0x"+signature.r;
-    signature.s = "0x"+signature.s;
-    signature.v = parseInt("0x"+signature.v);
-    signature.from = address;
-
-    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
-    const hash = (await provider.sendTransaction(signedTx)).hash;
-
-    setMintUrl(scanUrl + hash);
+    setDecreaseAllowanceData(data);
   };
 
   const getAuth = async (e) => {
     e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
     const _amount = e.target.elements[0].value;
     const { data } = await saraContract.populateTransaction['getAuth(uint256)'](_amount);
     const unsignedTx = {
@@ -288,12 +345,21 @@ function SaraModule({eth,address}) {
     setGetAuthUrl(scanUrl + hash);
   };
 
-  const transferFrom = async (e) => {
+  const getAuthEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _amount = document.querySelector('#Amount').value;
+    const { data } = await saraContract.populateTransaction['getAuth(uint256)'](_amount);
+
+    setGetAuthData(data);
+  };
+
+  const mint = async (e) => {
     e.preventDefault();
-    const _sender = e.target.elements[0].value;
-    const _recipient = e.target.elements[1].value;
-    const _amount = e.target.elements[2].value;
-    const { data } = await saraContract.populateTransaction['transferFrom(address,address,uint256)'](_sender, _recipient, _amount);
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _amount = e.target.elements[0].value;
+    const { data } = await saraContract.populateTransaction['mint(uint256)'](_amount);
     const unsignedTx = {
       to: contract.sara.address,
       value: 0,
@@ -318,7 +384,16 @@ function SaraModule({eth,address}) {
     const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
     const hash = (await provider.sendTransaction(signedTx)).hash;
 
-    setTransferFromUrl(scanUrl + hash);
+    setMintUrl(scanUrl + hash);
+  };
+
+  const mintEncode = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { saraContract } = await getSara(provider);
+    const _amount = document.querySelector('#Amount').value;
+    const { data } = await saraContract.populateTransaction['mint(uint256)'](_amount);
+
+    setMintData(data);
   };
 
   return (
@@ -371,66 +446,87 @@ function SaraModule({eth,address}) {
           </form>
         </div>
 
-        <br></br><br></br><h4>Transaction (개인 지갑 전용)</h4><hr/>
+        <br></br><br></br><h4>Transaction</h4><hr/>
 
         <div className='col-sm-4'>
-          <p>GetAuth, Tx Hash : <a href={getAuthUrl} target="_blank" rel="noreferrer">{getAuthUrl}</a></p>
-          <form className="form-inline" onSubmit={e => getAuth(e)}>
-            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
-            <button type="submit" className="btn btn-primary">Transact</button><hr/>
-          </form>
-        </div>
-
-        <div className='col-sm-4'>
-          <p>TransferFrom, Tx Hash : <a href={getTransferFromUrl} target="_blank" rel="noreferrer">{getTransferFromUrl}</a></p>
-          <form className="form-inline" onSubmit={e => transferFrom(e)}>
-            <input type="text" className="form-control" placeholder="Sender(address)"/>
-            <input type="text" className="form-control" placeholder="Recipient(address)"/>
-            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
-            <button type="submit" className="btn btn-primary">Transact</button><hr/>
-          </form>
-        </div>
-
-        <div className='col-sm-4'>
-          <p>Mint, Tx Hash : <a href={getMintUrl} target="_blank" rel="noreferrer">{getMintUrl}</a></p>
-          <form className="form-inline" onSubmit={e => mint(e)}>
-            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
-            <button type="submit" className="btn btn-primary">Transact</button><hr/>
-          </form>
-        </div>
-
-        <div className='col-sm-4'>
-          <p>Approve, Tx Hash : <a href={getApproveUrl} target="_blank" rel="noreferrer">{getApproveUrl}</a></p>
-          <form className="form-inline" onSubmit={e => approve(e)}>
-            <input type="text" className="form-control" placeholder="Spender(address)"/>
-            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
-            <button type="submit" className="btn btn-primary">Transact</button><hr/>
-          </form>
-        </div>
-
-        <div className='col-sm-4'>
-          <p>IncreaseAllowance, Tx Hash : <a href={getIncreaseAllowanceUrl} target="_blank" rel="noreferrer">{getIncreaseAllowanceUrl}</a></p>
-          <form className="form-inline" onSubmit={e => increaseAllowance(e)}>
-            <input type="text" className="form-control" placeholder="Spender(address)"/>
-            <input type="text" className="form-control" placeholder="AddedValue(uint256)"/>
-            <button type="submit" className="btn btn-primary">Transact</button><hr/>
-          </form>
-        </div>
-
-        <div className='col-sm-4'>
-          <p>DecreaseAllowance, Tx Hash : <a href={getDecreaseAllowanceUrl} target="_blank" rel="noreferrer">{getDecreaseAllowanceUrl}</a></p>
-          <form className="form-inline" onSubmit={e => decreaseAllowance(e)}>
-            <input type="text" className="form-control" placeholder="Spender(address)"/>
-            <input type="text" className="form-control" placeholder="SubtractedValue(uint256)"/>
-            <button type="submit" className="btn btn-primary">Transact</button><hr/>
-          </form>
-        </div>
-
-        <div className='col-sm-4'>
-          <p>Transfer, Tx Hash : <a href={getTransferUrl} target="_blank" rel="noreferrer">{getTransferUrl}</a></p>
+          <p>Transfer</p>
+          <p>Tx Hash : <a href={getTransferUrl} target="_blank" rel="noreferrer">{getTransferUrl}</a></p>
+          <p>Data Payload : {getTransferData}</p>
           <form className="form-inline" onSubmit={e => transfer(e)}>
-            <input type="text" className="form-control" placeholder="Recipient(address)"/>
-            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
+            <input type="text" className="form-control" placeholder="Recipient(address)" id="Recipient"/>
+            <input type="text" className="form-control" placeholder="Amount(uint256)" id="Amount"/>
+            <button type="button" className="btn btn-primary" onClick={transferEncode}>GetData</button>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>TransferFrom</p>
+          <p>Tx Hash : <a href={getTransferFromUrl} target="_blank" rel="noreferrer">{getTransferFromUrl}</a></p>
+          <p>Data Payload : {getTransferFromData}</p>
+          <form className="form-inline" onSubmit={e => transferFrom(e)}>
+            <input type="text" className="form-control" placeholder="Sender(address)" id="Sender"/>
+            <input type="text" className="form-control" placeholder="Recipient(address)" id="Recipient"/>
+            <input type="text" className="form-control" placeholder="Amount(uint256)" id="Amount"/>
+            <button type="button" className="btn btn-primary" onClick={transferFromEncode}>GetData</button>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>Approve</p>
+          <p>Tx Hash : <a href={getApproveUrl} target="_blank" rel="noreferrer">{getApproveUrl}</a></p>
+          <p>Data Payload : {getApproveData}</p>
+          <form className="form-inline" onSubmit={e => approve(e)}>
+            <input type="text" className="form-control" placeholder="Spender(address)" id="Spender"/>
+            <input type="text" className="form-control" placeholder="Amount(uint256)" id="Amount"/>
+            <button type="button" className="btn btn-primary" onClick={approveEncode}>GetData</button>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>IncreaseAllowance</p>
+          <p>Tx Hash : <a href={getIncreaseAllowanceUrl} target="_blank" rel="noreferrer">{getIncreaseAllowanceUrl}</a></p>
+          <p>Data Payload : {getIncreaseAllowanceData}</p>
+          <form className="form-inline" onSubmit={e => increaseAllowance(e)}>
+            <input type="text" className="form-control" placeholder="Spender(address)" id="Spender"/>
+            <input type="text" className="form-control" placeholder="AddedValue(uint256)" id="AddedValue"/>
+            <button type="button" className="btn btn-primary" onClick={increaseAllowanceEncode}>GetData</button>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>DecreaseAllowance</p>
+          <p>Tx Hash : <a href={getDecreaseAllowanceUrl} target="_blank" rel="noreferrer">{getDecreaseAllowanceUrl}</a></p>
+          <p>Data Payload : {getDecreaseAllowanceData}</p>
+          <form className="form-inline" onSubmit={e => decreaseAllowance(e)}>
+            <input type="text" className="form-control" placeholder="Spender(address)" id="Spender"/>
+            <input type="text" className="form-control" placeholder="SubtractedValue(uint256)" id="SubtractedValue"/>
+            <button type="button" className="btn btn-primary" onClick={decreaseAllowanceEncode}>GetData</button>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>GetAuth</p>
+          <p>Tx Hash : <a href={getAuthUrl} target="_blank" rel="noreferrer">{getAuthUrl}</a></p>
+          <p>Data Payload : {getAuthData}</p>
+          <form className="form-inline" onSubmit={e => getAuth(e)}>
+            <input type="text" className="form-control" placeholder="Amount(uint256)" id="Amount"/>
+            <button type="button" className="btn btn-primary" onClick={getAuthEncode}>GetData</button>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>Mint</p>
+          <p>Tx Hash : <a href={getMintUrl} target="_blank" rel="noreferrer">{getMintUrl}</a></p>
+          <p>Data Payload : {getMintData}</p>
+          <form className="form-inline" onSubmit={e => mint(e)}>
+            <input type="text" className="form-control" placeholder="Amount(uint256)" id="Amount"/>
+            <button type="button" className="btn btn-primary" onClick={mintEncode}>GetData</button>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
           </form>
         </div>

@@ -7,9 +7,6 @@ function MultiSigModule({eth,address}) {
   const network = 'https://data-seed-prebsc-1-s1.binance.org:8545';
   const scanUrl = 'https://testnet.bscscan.com/tx/';
 
-  const [multiSigContract, setMultiSigModule] = useState(undefined);
-  const [provider, setProvider] = useState(undefined);
-
   // Query state
   const [owners, setOwners] = useState(undefined);
 
@@ -21,14 +18,15 @@ function MultiSigModule({eth,address}) {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { multiSigContract } = await getMultiSigWallet(provider);
     const owners = await multiSigContract.getOwners();
-    setProvider(provider);
-    setMultiSigModule(multiSigContract);
+    
     setOwners(owners);
   };
 
   // Transaction
   const submitTransaction = async (e) => {
     e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
     const _to = e.target.elements[0].value;
     const _value = e.target.elements[1].value;
     const _data = e.target.elements[2].value;
