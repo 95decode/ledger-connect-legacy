@@ -7,7 +7,7 @@ function SaraModule({eth,address}) {
   const [saraContract, setSaraModule] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
 
-  // Query
+  // Query state
   const [owner, setOwner] = useState(undefined);
   const [decimals, setDecimals] = useState(undefined);
 
@@ -15,6 +15,7 @@ function SaraModule({eth,address}) {
   const [getAuthUrl, setGetAuthUrl] = useState(undefined);
   const [getTransferFromUrl, setTransferFromUrl] = useState(undefined);
 
+  // Query
   const getOwner = async () => {
     const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
     const { saraContract } = await getSara(provider);
@@ -33,6 +34,7 @@ function SaraModule({eth,address}) {
     setDecimals(decimals);
   };
 
+  // Transaction
   const getAuth = async (e) => {
     e.preventDefault();
     const dataInput = e.target.elements[0].value;
@@ -66,10 +68,10 @@ function SaraModule({eth,address}) {
 
   const transferFrom = async (e) => {
     e.preventDefault();
-    const from = e.target.elements[0].value;
-    const to = e.target.elements[1].value;
-    const value = e.target.elements[2].value;
-    const { data } = await saraContract.populateTransaction['transferFrom(address,address,uint256)'](from, to, value);
+    const _from = e.target.elements[0].value;
+    const _to = e.target.elements[1].value;
+    const _value = e.target.elements[2].value;
+    const { data } = await saraContract.populateTransaction['transferFrom(address,address,uint256)'](_from, _to, _value);
     const unsignedTx = {
       to: contract.sara.address,
       value: 0,
@@ -99,7 +101,10 @@ function SaraModule({eth,address}) {
 
   return (
     <div className='container'>
+      <h2>Sara Token</h2><hr/>
       <div className='row'>
+
+        <br></br><br></br><h4>Query</h4><hr/>
 
         <div className='col-sm-4'>
           <p>Decimals : {decimals ? decimals.toString() : "unknown" }</p>
@@ -110,6 +115,8 @@ function SaraModule({eth,address}) {
           <p>Owner : {owner ? owner.toString() : "unknown" }</p>
           <button onClick={() => getOwner()}>Query</button><hr/>
         </div>
+
+        <br></br><br></br><h4>Transaction (개인 지갑 전용)</h4><hr/>
 
         <div className='col-sm-4'>
           <p>getAuth, Tx Hash : <a href={getAuthUrl} target="_blank" rel="noreferrer">{getAuthUrl}</a></p>
