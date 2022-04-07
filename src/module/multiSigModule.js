@@ -62,7 +62,8 @@ function MultiSigModule({eth,address}) {
 
   return (
     <div className='container'>
-      <h2>Multi Signature Wallet</h2><hr/>
+      <h2>Multi Signature Wallet</h2>
+      <p>Contract Address : {contract.multiSigWallet.address}</p><hr/>
       <div className='row'>
 
         <br></br><br></br><h4>Query</h4><hr/>
