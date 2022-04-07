@@ -387,7 +387,7 @@ function SaraModule({eth,address}) {
           <p>TransferFrom, Tx Hash : <a href={getTransferFromUrl} target="_blank" rel="noreferrer">{getTransferFromUrl}</a></p>
           <form className="form-inline" onSubmit={e => transferFrom(e)}>
             <input type="text" className="form-control" placeholder="Sender(address)"/>
-            <input type="text" className="form-control" placeholder="Reicipient(address)"/>
+            <input type="text" className="form-control" placeholder="Recipient(address)"/>
             <input type="text" className="form-control" placeholder="Amount(uint256)"/>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
           </form>
@@ -423,7 +423,7 @@ function SaraModule({eth,address}) {
           <p>DecreaseAllowance, Tx Hash : <a href={getDecreaseAllowanceUrl} target="_blank" rel="noreferrer">{getDecreaseAllowanceUrl}</a></p>
           <form className="form-inline" onSubmit={e => decreaseAllowance(e)}>
             <input type="text" className="form-control" placeholder="Spender(address)"/>
-            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
+            <input type="text" className="form-control" placeholder="SubtractedValue(uint256)"/>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
           </form>
         </div>
@@ -431,7 +431,7 @@ function SaraModule({eth,address}) {
         <div className='col-sm-4'>
           <p>Transfer, Tx Hash : <a href={getTransferUrl} target="_blank" rel="noreferrer">{getTransferUrl}</a></p>
           <form className="form-inline" onSubmit={e => transfer(e)}>
-            <input type="text" className="form-control" placeholder="Reicipient(address)"/>
+            <input type="text" className="form-control" placeholder="Recipient(address)"/>
             <input type="text" className="form-control" placeholder="Amount(uint256)"/>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
           </form>
