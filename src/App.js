@@ -16,6 +16,7 @@ function App() {
 
   return (
     <div className='container'>
+      <br></br>{ !transport ? null : "My wallet address : " + address }<br></br><br></br><br></br>
       { !transport ? <ConnectLedger onTransport={(info) => saveInfo(info)}></ConnectLedger> : <SaraModule address={address} eth={eth}></SaraModule> }
       <br></br><br></br><br></br><br></br>
       { !transport ? null : <MultiSigModule address={address} eth={eth}></MultiSigModule> }

@@ -22,6 +22,11 @@ function SaraModule({eth,address}) {
   // Tx Url
   const [getAuthUrl, setGetAuthUrl] = useState(undefined);
   const [getTransferFromUrl, setTransferFromUrl] = useState(undefined);
+  const [getMintUrl, setMintUrl] = useState(undefined);
+  const [getApproveUrl, setApproveUrl] = useState(undefined);
+  const [getTransferUrl, setTransferUrl] = useState(undefined);
+  const [getIncreaseAllowanceUrl, setIncreaseAllowanceUrl] = useState(undefined);
+  const [getDecreaseAllowanceUrl, setDecreaseAllowanceUrl] = useState(undefined);
 
   // Query
   const getOwner = async () => {
@@ -91,6 +96,168 @@ function SaraModule({eth,address}) {
     setSaraModule(saraContract);
     setAllowance(allowance);
   };
+
+  //tmp
+  const transfer = async (e) => {
+    e.preventDefault();
+    const _recipient = e.target.elements[0].value;
+    const _amount = e.target.elements[1].value;
+    const { data } = await saraContract.populateTransaction['transfer(address,uint256)'](_recipient, _amount);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setTransferUrl(scanUrl + hash);
+  };
+
+  const approve = async (e) => {
+    e.preventDefault();
+    const _spender = e.target.elements[0].value;
+    const _amount = e.target.elements[1].value;
+    const { data } = await saraContract.populateTransaction['approve(address,uint256)'](_spender, _amount);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setApproveUrl(scanUrl + hash);
+  };
+
+  const increaseAllowance = async (e) => {
+    e.preventDefault();
+    const _spender = e.target.elements[0].value;
+    const _addedValue = e.target.elements[1].value;
+    const { data } = await saraContract.populateTransaction['increaseAllowance(address,uint256)'](_spender, _addedValue);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setIncreaseAllowanceUrl(scanUrl + hash);
+  };
+
+  const decreaseAllowance = async (e) => {
+    e.preventDefault();
+    const _spender = e.target.elements[0].value;
+    const _subtractedValue = e.target.elements[1].value;
+    const { data } = await saraContract.populateTransaction['decreaseAllowance(address,uint256)'](_spender, _subtractedValue);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setDecreaseAllowanceUrl(scanUrl + hash);
+  };
+
+  const mint = async (e) => {
+    e.preventDefault();
+    const _amount = e.target.elements[0].value;
+    const { data } = await saraContract.populateTransaction['mint(uint256)'](_amount);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setMintUrl(scanUrl + hash);
+  };
+
+  //tmp
 
   // Transaction
   const getAuth = async (e) => {
@@ -209,7 +376,7 @@ function SaraModule({eth,address}) {
         <br></br><br></br><h4>Transaction (개인 지갑 전용)</h4><hr/>
 
         <div className='col-sm-4'>
-          <p>getAuth, Tx Hash : <a href={getAuthUrl} target="_blank" rel="noreferrer">{getAuthUrl}</a></p>
+          <p>GetAuth, Tx Hash : <a href={getAuthUrl} target="_blank" rel="noreferrer">{getAuthUrl}</a></p>
           <form className="form-inline" onSubmit={e => getAuth(e)}>
             <input type="text" className="form-control" placeholder="Amount(uint256)"/>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
@@ -217,9 +384,53 @@ function SaraModule({eth,address}) {
         </div>
 
         <div className='col-sm-4'>
-          <p>transferFrom, Tx Hash : <a href={getTransferFromUrl} target="_blank" rel="noreferrer">{getTransferFromUrl}</a></p>
+          <p>TransferFrom, Tx Hash : <a href={getTransferFromUrl} target="_blank" rel="noreferrer">{getTransferFromUrl}</a></p>
           <form className="form-inline" onSubmit={e => transferFrom(e)}>
             <input type="text" className="form-control" placeholder="Sender(address)"/>
+            <input type="text" className="form-control" placeholder="Reicipient(address)"/>
+            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>Mint, Tx Hash : <a href={getMintUrl} target="_blank" rel="noreferrer">{getMintUrl}</a></p>
+          <form className="form-inline" onSubmit={e => mint(e)}>
+            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>Approve, Tx Hash : <a href={getApproveUrl} target="_blank" rel="noreferrer">{getApproveUrl}</a></p>
+          <form className="form-inline" onSubmit={e => approve(e)}>
+            <input type="text" className="form-control" placeholder="Spender(address)"/>
+            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>IncreaseAllowance, Tx Hash : <a href={getIncreaseAllowanceUrl} target="_blank" rel="noreferrer">{getIncreaseAllowanceUrl}</a></p>
+          <form className="form-inline" onSubmit={e => increaseAllowance(e)}>
+            <input type="text" className="form-control" placeholder="Spender(address)"/>
+            <input type="text" className="form-control" placeholder="AddedValue(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>DecreaseAllowance, Tx Hash : <a href={getDecreaseAllowanceUrl} target="_blank" rel="noreferrer">{getDecreaseAllowanceUrl}</a></p>
+          <form className="form-inline" onSubmit={e => decreaseAllowance(e)}>
+            <input type="text" className="form-control" placeholder="Spender(address)"/>
+            <input type="text" className="form-control" placeholder="Amount(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>Transfer, Tx Hash : <a href={getTransferUrl} target="_blank" rel="noreferrer">{getTransferUrl}</a></p>
+          <form className="form-inline" onSubmit={e => transfer(e)}>
             <input type="text" className="form-control" placeholder="Reicipient(address)"/>
             <input type="text" className="form-control" placeholder="Amount(uint256)"/>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
