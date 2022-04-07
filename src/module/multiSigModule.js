@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import getSara from './getSara.js';
+import getmultiSigWallet from './getmultiSigWallet.js';
 import { ethers } from 'ethers';
 
-function SaraModule({eth,address}) {
-  const [saraContract, setSaraModule] = useState(undefined);
-  const [decimals, setDecimals] = useState(undefined);
+///////////////////// 양식임
+function MultiSigModule({eth,address}) {
+  const [multiSigContract, setMultiSigModule] = useState(undefined);
+  //const [decimals, setDecimals] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
   const [url, setUrl] = useState(undefined);
 
   const getDecimals = async () => {
     const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
-    const { saraContract } = await getSara(provider);
-    const decimals = await saraContract.decimals();
+    const { multiSigContract } = await getmultiSigWallet(provider);
+    const decimals = await multiSigContract.decimals();
     setProvider(provider);
-    setSaraModule(saraContract);
+    setMultiSigModule(multiSigContract);
     setDecimals(decimals);
   };
 
@@ -21,11 +22,11 @@ function SaraModule({eth,address}) {
     e.preventDefault();
     const dataInput = e.target.elements[0].value;
     console.log(dataInput);
-    console.log(saraContract);
-    //const { data } = await saraContract.populateTransaction['updateData(uint256)'](dataInput);
+    console.log(multiSigContract);
+    //const { data } = await multiSigContract.populateTransaction['updateData(uint256)'](dataInput);
 
     const unsignedTx = {
-      //to: saraContract.address,
+      //to: multiSigContract.address,
       to: "0xee325C9c0d7e8b6A747eC016318A6b1e2d0248aD",
       value: ethers.utils.hexlify(100000),
       gasPrice: (await provider.getGasPrice())._hex,
@@ -89,4 +90,4 @@ function SaraModule({eth,address}) {
   );
 }
 
-export default SaraModule;
+export default MultiSigModule;
