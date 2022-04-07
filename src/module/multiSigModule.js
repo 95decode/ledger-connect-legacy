@@ -3,6 +3,10 @@ import getMultiSigWallet from './getMultiSigWallet.js';
 import { ethers } from 'ethers';
 
 function MultiSigModule({eth,address}) {
+  const contract = require('../contract/contract.json');
+  const network = 'https://data-seed-prebsc-1-s1.binance.org:8545';
+  const scanUrl = 'https://testnet.bscscan.com/tx/';
+
   const [multiSigContract, setMultiSigModule] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
 
@@ -14,7 +18,7 @@ function MultiSigModule({eth,address}) {
 
   // Query
   const getOwners = async () => {
-    const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
+    const provider = new ethers.providers.JsonRpcProvider(network);
     const { multiSigContract } = await getMultiSigWallet(provider);
     const owners = await multiSigContract.getOwners();
     setProvider(provider);
@@ -53,7 +57,7 @@ function MultiSigModule({eth,address}) {
     const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
     const hash = (await provider.sendTransaction(signedTx)).hash;
 
-    setSubmitTransactionUrl("https://testnet.bscscan.com/tx/" + hash);
+    setSubmitTransactionUrl(scanUrl + hash);
   };
 
   return (
