@@ -9,17 +9,40 @@ function MultiSigModule({eth,address}) {
 
   // Query state
   const [owners, setOwners] = useState(undefined);
+  const [transactionCount, setTransactionCount] = useState(undefined);
+  const [transaction, setTransaction] = useState(undefined);
 
   // Tx Url
   const [getSubmitTransactionUrl, setSubmitTransactionUrl] = useState(undefined);
+  const [getConfirmTransactionUrl, setConfirmTransactionUrl] = useState(undefined);
+  const [getRevokeTransactionUrl, setRevokeTransactionUrl] = useState(undefined);
+  const [getExecuteTransactionUrl, setExecuteTransactionUrl] = useState(undefined);
 
   // Query
   const getOwners = async () => {
     const provider = new ethers.providers.JsonRpcProvider(network);
     const { multiSigContract } = await getMultiSigWallet(provider);
     const owners = await multiSigContract.getOwners();
-    
+
     setOwners(owners);
+  };
+
+  const getTransactionCount = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const transactionCount = await multiSigContract.getTransactionCount();
+
+    setTransactionCount(transactionCount);
+  };
+
+  const getTransaction = async (e) => {
+    e.preventDefault();
+    const _txIndex = e.target.elements[0].value;
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const transaction = await multiSigContract.getTransaction(_txIndex);
+
+    setTransaction(transaction);
   };
 
   // Transaction
@@ -58,6 +81,105 @@ function MultiSigModule({eth,address}) {
     setSubmitTransactionUrl(scanUrl + hash);
   };
 
+  const confirmTransaction = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const _txIndex = e.target.elements[0].value;
+    const { data } = await multiSigContract.populateTransaction['confirmTransaction(uint256)'](_txIndex);
+    const unsignedTx = {
+      to: contract.multiSigWallet.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setConfirmTransactionUrl(scanUrl + hash);
+  };
+
+  const revokeTransaction = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const _txIndex = e.target.elements[0].value;
+    const { data } = await multiSigContract.populateTransaction['revokeTransaction(uint256)'](_txIndex);
+    const unsignedTx = {
+      to: contract.multiSigWallet.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setRevokeTransactionUrl(scanUrl + hash);
+  };
+
+  const executeTransaction = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const _txIndex = e.target.elements[0].value;
+    const { data } = await multiSigContract.populateTransaction['executeTransaction(uint256)'](_txIndex);
+    const unsignedTx = {
+      to: contract.multiSigWallet.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setExecuteTransactionUrl(scanUrl + hash);
+  };
+
   return (
     <div className='container'>
       <h2>Multi Signature Wallet</h2>
@@ -65,20 +187,61 @@ function MultiSigModule({eth,address}) {
       <div className='row'>
 
         <br></br><br></br><h4>Query</h4><hr/>
-
+        
         <div className='col-sm-4'>
           <p>Owners : {owners ? owners.toString() : "unknown" }</p>
           <button onClick={() => getOwners()}>Query</button><hr/>
         </div>
 
-        <br></br><br></br><h4>Transaction (회사 지갑 전용)</h4><hr/>
+        <div className='col-sm-4'>
+          <p>TransactionCount : {transactionCount ? transactionCount.toString() : "unknown" }</p>
+          <button onClick={() => getTransactionCount()}>Query</button><hr/>
+        </div>
 
         <div className='col-sm-4'>
-          <p>submitTransaction, Tx Hash : <a href={getSubmitTransactionUrl} target="_blank" rel="noreferrer">{getSubmitTransactionUrl}</a></p>
+          <p>Transaction : {transaction ? transaction.toString() : "unknown" }</p>
+          <form className="form-inline" onSubmit={e => getTransaction(e)}>
+            <input type="text" className="form-control" placeholder="TxIndex(uint256)"/>
+            <button type="submit" className="btn btn-primary">Query</button><hr/>
+          </form>
+        </div>
+
+        <br></br><br></br><h4>Transaction</h4><hr/>
+
+        <div className='col-sm-4'>
+          <p>SubmitTransaction</p>
+          <p>Tx Hash : <a href={getSubmitTransactionUrl} target="_blank" rel="noreferrer">{getSubmitTransactionUrl}</a></p>
           <form className="form-inline" onSubmit={e => submitTransaction(e)}>
             <input type="text" className="form-control" placeholder="To(address)"/>
             <input type="text" className="form-control" placeholder="Value(uint256)"/>
             <input type="text" className="form-control" placeholder="Data(bytes)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>ConfirmTransaction</p>
+          <p>Tx Hash : <a href={getConfirmTransactionUrl} target="_blank" rel="noreferrer">{getConfirmTransactionUrl}</a></p>
+          <form className="form-inline" onSubmit={e => confirmTransaction(e)}>
+            <input type="text" className="form-control" placeholder="TxIndex(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>RevokeTransaction</p>
+          <p>Tx Hash : <a href={getRevokeTransactionUrl} target="_blank" rel="noreferrer">{getRevokeTransactionUrl}</a></p>
+          <form className="form-inline" onSubmit={e => revokeTransaction(e)}>
+            <input type="text" className="form-control" placeholder="TxIndex(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>ExecuteTransaction</p>
+          <p>Tx Hash : <a href={getExecuteTransactionUrl} target="_blank" rel="noreferrer">{getExecuteTransactionUrl}</a></p>
+          <form className="form-inline" onSubmit={e => executeTransaction(e)}>
+            <input type="text" className="form-control" placeholder="TxIndex(uint256)"/>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
           </form>
         </div>
