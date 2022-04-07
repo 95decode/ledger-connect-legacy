@@ -442,7 +442,7 @@ function SaraModule({eth,address}) {
   return (
     <div className='container'>
       <h2>Sara Token</h2>
-      <p>Contract Address : {contract.sara.address}</p><hr/>
+      <p>Contract Address : <a href={"https://testnet.bscscan.com/address/" + contract.sara.address} target="_blank" rel="noreferrer">{contract.sara.address}</a></p><hr/>
       <div className='row'>
 
         <br></br><br></br><h4>Query</h4><hr/>

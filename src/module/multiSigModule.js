@@ -183,7 +183,7 @@ function MultiSigModule({eth,address}) {
   return (
     <div className='container'>
       <h2>Multi Signature Wallet</h2>
-      <p>Contract Address : {contract.multiSigWallet.address}</p><hr/>
+      <p>Contract Address : <a href={"https://testnet.bscscan.com/address/" + contract.multiSigWallet.address} target="_blank" rel="noreferrer">{contract.multiSigWallet.address}</a></p><hr/>
       <div className='row'>
 
         <br></br><br></br><h4>Query</h4><hr/>
