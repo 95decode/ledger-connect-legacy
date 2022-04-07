@@ -3,11 +3,27 @@ import getSara from './getSara.js';
 import { ethers } from 'ethers';
 
 function SaraModule({eth,address}) {
+  const contract = require('../contract/contract.json');
   const [saraContract, setSaraModule] = useState(undefined);
-  const [decimals, setDecimals] = useState(undefined);
   const [provider, setProvider] = useState(undefined);
-  const [url, setUrl] = useState(undefined);
 
+  // Query
+  const [owner, setOwner] = useState(undefined);
+  const [decimals, setDecimals] = useState(undefined);
+
+  // Tx Url
+  const [getAuthUrl, setGetAuthUrl] = useState(undefined);
+  const [getTransferFromUrl, setTransferFromUrl] = useState(undefined);
+
+  const getOwner = async () => {
+    const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
+    const { saraContract } = await getSara(provider);
+    const owner = await saraContract.getOwner();
+    setProvider(provider);
+    setSaraModule(saraContract);
+    setOwner(owner);
+  };
+  
   const getDecimals = async () => {
     const provider = new ethers.providers.JsonRpcProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
     const { saraContract } = await getSara(provider);
@@ -17,49 +33,69 @@ function SaraModule({eth,address}) {
     setDecimals(decimals);
   };
 
-  const updateData = async (e) => {
+  const getAuth = async (e) => {
     e.preventDefault();
     const dataInput = e.target.elements[0].value;
-    console.log(dataInput);
-    console.log(saraContract);
-    //const { data } = await saraContract.populateTransaction['updateData(uint256)'](dataInput);
-
+    const { data } = await saraContract.populateTransaction['getAuth(uint256)'](dataInput);
     const unsignedTx = {
-      //to: saraContract.address,
-      to: "0xee325C9c0d7e8b6A747eC016318A6b1e2d0248aD",
-      value: ethers.utils.hexlify(100000),
+      to: contract.sara.address,
+      value: 0,
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(100000),
       nonce: await provider.getTransactionCount(address, "latest"),
       chainId: 97,
-      data: "",
+      data: data,
     }
-    console.log(unsignedTx);
-    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
 
-    console.log(serializedTx);
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
     const signature = await eth.signTransaction(
       "44'/60'/0'/0/0",
       serializedTx
     );
 
-    console.log(signature);
-    //Parse the signature
     signature.r = "0x"+signature.r;
     signature.s = "0x"+signature.s;
     signature.v = parseInt("0x"+signature.v);
     signature.from = address;
-    console.log(signature);
 
-    //Serialize the same transaction as before, but adding the signature on it
     const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
-    console.log(signedTx);
-
     const hash = (await provider.sendTransaction(signedTx)).hash;
-    console.log(hash);
-    setUrl("https://testnet.bscscan.com/tx/" + hash);
+
+    setGetAuthUrl("https://testnet.bscscan.com/tx/" + hash);
   };
 
+  const transferFrom = async (e) => {
+    e.preventDefault();
+    const from = e.target.elements[0].value;
+    const to = e.target.elements[1].value;
+    const value = e.target.elements[2].value;
+    const { data } = await saraContract.populateTransaction['transferFrom(address,address,uint256)'](from, to, value);
+    const unsignedTx = {
+      to: contract.sara.address,
+      value: 0,
+      gasPrice: (await provider.getGasPrice())._hex,
+      gasLimit: ethers.utils.hexlify(100000),
+      nonce: await provider.getTransactionCount(address, "latest"),
+      chainId: 97,
+      data: data,
+    }
+
+    const serializedTx = ethers.utils.serializeTransaction(unsignedTx).slice(2);
+    const signature = await eth.signTransaction(
+      "44'/60'/0'/0/0",
+      serializedTx
+    );
+
+    signature.r = "0x"+signature.r;
+    signature.s = "0x"+signature.s;
+    signature.v = parseInt("0x"+signature.v);
+    signature.from = address;
+
+    const signedTx = ethers.utils.serializeTransaction(unsignedTx, signature);
+    const hash = (await provider.sendTransaction(signedTx)).hash;
+
+    setTransferFromUrl("https://testnet.bscscan.com/tx/" + hash);
+  };
 
   return (
     <div className='container'>
@@ -71,19 +107,28 @@ function SaraModule({eth,address}) {
         </div>
 
         <div className='col-sm-4'>
-          <p>Change data</p>
-          <form className="form-inline" onSubmit={e => updateData(e)}>
-            <input type="text" className="form-control" placeholder="data"/>
-            <button type="submit" className="btn btn-primary">Submit</button><hr/>
+          <p>Owner : {owner ? owner.toString() : "unknown" }</p>
+          <button onClick={() => getOwner()}>Query</button><hr/>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>getAuth, Tx Hash : <a href={getAuthUrl} target="_blank" rel="noreferrer">{getAuthUrl}</a></p>
+          <form className="form-inline" onSubmit={e => getAuth(e)}>
+            <input type="text" className="form-control" placeholder="Value(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
           </form>
         </div>
 
-        <div className="mt-5 mx-auto d-flex flex-column">
-          <p>
-            HASH :
-          </p>
-          <p><a href={url} target="_blank" rel="noreferrer">{url}</a></p>
+        <div className='col-sm-4'>
+          <p>transferFrom, Tx Hash : <a href={getTransferFromUrl} target="_blank" rel="noreferrer">{getTransferFromUrl}</a></p>
+          <form className="form-inline" onSubmit={e => transferFrom(e)}>
+            <input type="text" className="form-control" placeholder="From(address)"/>
+            <input type="text" className="form-control" placeholder="To(address)"/>
+            <input type="text" className="form-control" placeholder="Value(uint256)"/>
+            <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
         </div>
+
       </div>
     </div>
   );
