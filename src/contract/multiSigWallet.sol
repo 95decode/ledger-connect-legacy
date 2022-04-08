@@ -56,7 +56,7 @@ contract MultiSigWallet {
     }
 
     modifier onlyWallet() {
-        require(msg.sender != address(this));
+        require(msg.sender == address(this), "not wallet");
         _;
     }
 
