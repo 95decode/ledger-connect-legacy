@@ -14,6 +14,10 @@ contract MultiSigWallet {
     event RevokeConfirmation(address indexed owner, uint indexed txIndex);
     event ExecuteTransaction(address indexed owner, uint indexed txIndex);
 
+    event OwnerAddition(address indexed owner);
+    event OwnerRemoval(address indexed owner);
+    event RequirementChange(uint required);
+
     address[] public owners;
     mapping(address => bool) public isOwner;
     uint public numConfirmationsRequired;
@@ -51,6 +55,11 @@ contract MultiSigWallet {
         _;
     }
 
+    modifier onlyWallet() {
+        require(msg.sender != address(this));
+        _;
+    }
+
     constructor(address[] memory _owners, uint _numConfirmationsRequired) {
         require(_owners.length > 0, "owners required");
         require(
@@ -76,11 +85,7 @@ contract MultiSigWallet {
         emit Deposit(msg.sender, msg.value, address(this).balance);
     }
 
-    function submitTransaction(
-        address _to,
-        uint _value,
-        bytes memory _data
-    ) public onlyOwner {
+    function submitTransaction(address _to, uint _value, bytes memory _data) public onlyOwner {
         uint txIndex = transactions.length;
 
         transactions.push(
@@ -96,13 +101,7 @@ contract MultiSigWallet {
         emit SubmitTransaction(msg.sender, txIndex, _to, _value, _data);
     }
 
-    function confirmTransaction(uint _txIndex)
-        public
-        onlyOwner
-        txExists(_txIndex)
-        notExecuted(_txIndex)
-        notConfirmed(_txIndex)
-    {
+    function confirmTransaction(uint _txIndex) public onlyOwner txExists(_txIndex) notExecuted(_txIndex) notConfirmed(_txIndex) {
         Transaction storage transaction = transactions[_txIndex];
         transaction.numConfirmations += 1;
         isConfirmed[_txIndex][msg.sender] = true;
@@ -110,12 +109,7 @@ contract MultiSigWallet {
         emit ConfirmTransaction(msg.sender, _txIndex);
     }
 
-    function executeTransaction(uint _txIndex)
-        public
-        onlyOwner
-        txExists(_txIndex)
-        notExecuted(_txIndex)
-    {
+    function executeTransaction(uint _txIndex) public onlyOwner txExists(_txIndex) notExecuted(_txIndex) {
         Transaction storage transaction = transactions[_txIndex];
 
         require(
@@ -133,12 +127,7 @@ contract MultiSigWallet {
         emit ExecuteTransaction(msg.sender, _txIndex);
     }
 
-    function revokeConfirmation(uint _txIndex)
-        public
-        onlyOwner
-        txExists(_txIndex)
-        notExecuted(_txIndex)
-    {
+    function revokeConfirmation(uint _txIndex) public onlyOwner txExists(_txIndex) notExecuted(_txIndex) {
         Transaction storage transaction = transactions[_txIndex];
 
         require(isConfirmed[_txIndex][msg.sender], "tx not confirmed");
@@ -157,17 +146,13 @@ contract MultiSigWallet {
         return transactions.length;
     }
 
-    function getTransaction(uint _txIndex)
-        public
-        view
-        returns (
+    function getTransaction(uint _txIndex) public view returns (
             address to,
             uint value,
             bytes memory data,
             bool executed,
             uint numConfirmations
-        )
-    {
+        ) {
         Transaction storage transaction = transactions[_txIndex];
 
         return (
@@ -177,5 +162,39 @@ contract MultiSigWallet {
             transaction.executed,
             transaction.numConfirmations
         );
+    }
+
+    function addOwner(address owner) public onlyWallet {
+        require(!isOwner[owner]);
+
+        isOwner[owner] = true;
+        owners.push(owner);
+        emit OwnerAddition(owner);
+    }
+
+    function removeOwner(address owner) public onlyWallet {
+        require(isOwner[owner]);
+
+        isOwner[owner] = false;
+
+        for (uint i=0; i<owners.length - 1; i++) {
+            if (owners[i] == owner) {
+                owners[i] = owners[owners.length - 1];
+                owners[owners.length - 1] = owner;
+                break;
+            }
+        }
+
+        owners.pop();
+
+        if (numConfirmationsRequired > owners.length)
+            changeRequirement(owners.length);
+
+        emit OwnerRemoval(owner);
+    }
+
+    function changeRequirement(uint required) public onlyWallet {
+        numConfirmationsRequired = required;
+        emit RequirementChange(required);
     }
 }
