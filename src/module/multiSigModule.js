@@ -18,6 +18,11 @@ function MultiSigModule({eth,address}) {
   const [getRevokeTransactionUrl, setRevokeTransactionUrl] = useState(undefined);
   const [getExecuteTransactionUrl, setExecuteTransactionUrl] = useState(undefined);
 
+  // Data Payload
+  const [getAddOwnerData, setAddOwnerData] = useState(undefined);
+  const [getRemoveOwnerData, setRemoveOwnerData] = useState(undefined);
+  const [getChangeRequirementData, setChangeRequirementData] = useState(undefined);
+
   // Query
   const getOwners = async () => {
     const provider = new ethers.providers.JsonRpcProvider(network);
@@ -180,6 +185,36 @@ function MultiSigModule({eth,address}) {
     setExecuteTransactionUrl(scanUrl + hash);
   };
 
+  const addOwnerEncode = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const _owner = e.target.elements[0].value;
+    const { data } = await multiSigContract.populateTransaction['addOwner(address)'](_owner);
+
+    setAddOwnerData(data);
+  };
+
+  const removeOwnerEncode = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const _owner = e.target.elements[0].value;
+    const { data } = await multiSigContract.populateTransaction['removeOwner(address)'](_owner);
+
+    setRemoveOwnerData(data);
+  };
+
+  const changeRequirementEncode = async (e) => {
+    e.preventDefault();
+    const provider = new ethers.providers.JsonRpcProvider(network);
+    const { multiSigContract } = await getMultiSigWallet(provider);
+    const _requirement = e.target.elements[0].value;
+    const { data } = await multiSigContract.populateTransaction['changeRequirement(uint256)'](_requirement);
+
+    setChangeRequirementData(data);
+  };
+
   return (
     <div className='container'>
       <h2>Multi Signature Wallet</h2>
@@ -244,6 +279,33 @@ function MultiSigModule({eth,address}) {
           <form className="form-inline" onSubmit={e => executeTransaction(e)}>
             <input type="text" className="form-control" placeholder="TxIndex(uint256)"/>
             <button type="submit" className="btn btn-primary">Transact</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>AddOwner</p>
+          <p>Data Payload : {getAddOwnerData}</p>
+          <form className="form-inline" onSubmit={e => addOwnerEncode(e)}>
+            <input type="text" className="form-control" placeholder="Owner(address)"/>
+            <button type="submit" className="btn btn-primary">GetData</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>RemoveOwner</p>
+          <p>Data Payload : {getRemoveOwnerData}</p>
+          <form className="form-inline" onSubmit={e => removeOwnerEncode(e)}>
+            <input type="text" className="form-control" placeholder="Owner(address)"/>
+            <button type="submit" className="btn btn-primary">GetData</button><hr/>
+          </form>
+        </div>
+
+        <div className='col-sm-4'>
+          <p>ChangeRequirement</p>
+          <p>Data Payload : {getChangeRequirementData}</p>
+          <form className="form-inline" onSubmit={e => changeRequirementEncode(e)}>
+            <input type="text" className="form-control" placeholder="Requirement(uint256)"/>
+            <button type="submit" className="btn btn-primary">GetData</button><hr/>
           </form>
         </div>
 
