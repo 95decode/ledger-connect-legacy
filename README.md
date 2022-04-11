@@ -1,8 +1,8 @@
 # ledger-test
 Ledger Nano X repository for test
-크롬 브라우저와 Ledger Nano X의 블루투스 연결이 자주 끊깁니다.
-매번 Nonce 값을 불러와서 서명하기 때문에 Nonce 값이 변하지 않았다면 같은 트랜잭션이 두번 요청되지 않습니다.
-요청이 처리되지 않으면 다시 요청하면 됩니다.
+크롬 브라우저와 Ledger Nano X의 블루투스 연결이 자주 끊깁니다.  
+매번 Nonce 값을 불러와서 서명하기 때문에 Nonce 값이 변하지 않았다면 같은 트랜잭션이 두번 요청되지 않습니다.  
+요청이 처리되지 않으면 다시 요청하면 됩니다.  
 
 ## Page
 | Page | Link |
