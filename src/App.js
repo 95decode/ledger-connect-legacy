@@ -14,10 +14,12 @@ function App() {
     setTransport(info.transport);
   }
 
+  const ref = require('./reference/reference.json');
+
   return (
     <div className='container'>
       <br></br>{ !transport ? null : "My Wallet Address : "}
-      <a href={"https://testnet.bscscan.com/address/" + address} target="_blank" rel="noreferrer">{ !transport ? null : address }</a><br></br><br></br><br></br>
+      <a href={ref.bsc.testnet.scan.addr + address} target="_blank" rel="noreferrer">{ !transport ? null : address }</a><br></br><br></br><br></br>
       { !transport ? <ConnectLedger onTransport={(info) => saveInfo(info)}></ConnectLedger> : <SaraModule address={address} eth={eth}></SaraModule> }
       <br></br><br></br><br></br><br></br>
       { !transport ? null : <MultiSigModule address={address} eth={eth}></MultiSigModule> }

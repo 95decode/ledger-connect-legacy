@@ -4,8 +4,11 @@ import { ethers } from 'ethers';
 
 function SaraModule({eth,address}) {
   const contract = require('../contract/contract.json');
-  const network = 'https://data-seed-prebsc-1-s1.binance.org:8545';
-  const scanUrl = 'https://testnet.bscscan.com/tx/';
+  const ref = require('../reference/reference.json');
+  const chainId = ref.bsc.testnet.id;
+  const network = ref.bsc.testnet.network;
+  const scanUrl = ref.bsc.testnet.scan.tx;
+  const addrUrl = ref.bsc.testnet.scan.addr;
 
   // Query state
   const [owner, setOwner] = useState(undefined);
@@ -104,7 +107,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -149,7 +152,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -194,7 +197,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -238,7 +241,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -282,7 +285,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -325,7 +328,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -367,7 +370,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -409,7 +412,7 @@ function SaraModule({eth,address}) {
       gasPrice: (await provider.getGasPrice())._hex,
       gasLimit: ethers.utils.hexlify(210000),
       nonce: await provider.getTransactionCount(address, "latest"),
-      chainId: 97,
+      chainId: chainId,
       data: data,
     }
 
@@ -442,7 +445,7 @@ function SaraModule({eth,address}) {
   return (
     <div className='container'>
       <h2>Sara Token</h2>
-      <p>Contract Address : <a href={"https://testnet.bscscan.com/address/" + contract.sara.address} target="_blank" rel="noreferrer">{contract.sara.address}</a></p><hr/>
+      <p>Contract Address : <a href={addrUrl + contract.sara.address} target="_blank" rel="noreferrer">{contract.sara.address}</a></p><hr/>
       <div className='row'>
 
         <br></br><br></br><h4>Query</h4><hr/>
